@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1084092227396",
+    "project_id": "payoo-7b627",
+    "storage_bucket": "payoo-7b627.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1084092227396:android:3bd9f93f19a58a5fa38111",
+        "android_client_info": {
+          "package_name": "com.example.payoo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1084092227396-8iu1ffv44r86a0c32mo81137qp3ok3lg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.payoo",
+            "certificate_hash": "bb50cd983f8576e1a5a97a17a60146f22a1ba1c7"
+          }
+        },
+        {
+          "client_id": "1084092227396-apjob29e9e0norq05ktl0dpoo26qonr7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBw-R8Yclx8jcpws0cS9-lsBk8IyduZS0U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1084092227396-apjob29e9e0norq05ktl0dpoo26qonr7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
