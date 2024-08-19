@@ -20,7 +20,7 @@ class TransactionItem extends StatelessWidget {
       color: AppColors.white,
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.wine,
           child: Text(
             initials,
             style: TextStyle(color: AppColors.white),

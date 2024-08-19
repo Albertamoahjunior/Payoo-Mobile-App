@@ -6,6 +6,7 @@ import '../utils/colors.dart';
 import './home_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -79,31 +80,80 @@ class LoginScreen extends StatelessWidget {
               CustomButton(
                 text: 'Continue with Google',
                 onPressed: () async {
-                  User? user = await _signInWithGoogle();
-
-                    if (user != null) {
-                      // Prepare the request body
-                      final requestBody = {
-                        "id": user.uid,
-                        "userEmail": user.email,
-                        "phoneNumber": user.phoneNumber ?? '',
-                        "userName": user.displayName ?? ''
-                      };
-
-                      // Make the API request (using any HTTP client like http package in Flutter)
-                      final response = await http.post(
-                        Uri.parse('http://100.66.114.55:8000/users/'),
-                        headers: {"Content-Type": "application/json"},
-                        body: jsonEncode(requestBody),
+                  // Show loading indicator before starting the sign-in process
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      return Center(
+                        child: CircularProgressIndicator(),
                       );
+                    },
+                  );
 
-                      if ((response.statusCode == 201) || (response.statusCode == 200)) {
-                        print('User created successfully');
-                      } else {
-                        print('Failed to create user');
-                      }
+                  //User? user = await _signInWithGoogle();
+                  User? user;
+                  try {
+                    user = await _signInWithGoogle();
+                  } finally {
+                    // Dismiss the loading indicator
+                    Navigator.of(context).pop();
+                  }
+
+                  if (user != null) {
+                    // Save user details to SharedPreferences
+                    final SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    await prefs.setString('userId', user.uid);
+                    await prefs.setString('userEmail', user.email ?? '');
+                    await prefs.setString('userName', user.displayName ?? '');
+                    await prefs.setString('userPhone', user.phoneNumber ?? '');
+
+                    // Show loading indicator while making the API request
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      },
+                    );
+                    // Prepare the request body
+                    final requestBody = {
+                      "id": user.uid,
+                      "userEmail": user.email,
+                      "phoneNumber": user.phoneNumber ?? '',
+                      "userName": user.displayName ?? ''
+                    };
+
+                    print("logged waiting to create user");
+
+                    // Make the API request (using any HTTP client like http package in Flutter)
+                    final response = await http.post(
+                      Uri.parse('http://100.66.114.55:8000/users/'),
+                      headers: {"Content-Type": "application/json",
+                       "Accept": "application/json"
+                       },
+                      body: jsonEncode(requestBody),
+                    );
+
+                    // Dismiss the loading indicator
+                    Navigator.of(context).pop();
+
+                    if ((response.statusCode == 201) ||
+                        (response.statusCode == 200)) {
+                      print('User created successfully');
+
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreen(),
+                          ));
+                    } else {
+                      print('Failed to create user');
                     }
-
+                  }
                 },
                 icon: 'assets/google.png',
               ),
