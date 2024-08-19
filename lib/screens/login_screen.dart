@@ -131,7 +131,7 @@ class LoginScreen extends StatelessWidget {
 
                     // Make the API request (using any HTTP client like http package in Flutter)
                     final response = await http.post(
-                      Uri.parse('http://100.66.114.55:8000/users/'),
+                      Uri.parse('https://payoo-backend.vercel.app/users/'),
                       headers: {"Content-Type": "application/json",
                        "Accept": "application/json"
                        },
