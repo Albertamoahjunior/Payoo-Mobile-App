@@ -21,14 +21,15 @@ class PayooApp extends StatelessWidget {
         textTheme: TextTheme(
           displayLarge: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w700),
           bodyLarge: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
-          bodyMedium: TextStyle(fontFamily: 'Roboto,',
-          fontWeight: FontWeight.w300,
+          bodyMedium: TextStyle(fontFamily: 'Roboto',
+            fontWeight: FontWeight.w300,
           ),
         ),
         primaryColor: AppColors.primary,
         scaffoldBackgroundColor: AppColors.background,
       ),
       home: const LoginScreen(),
+      debugShowCheckedModeBanner: false, // Remove the debug banner
     );
   }
 }

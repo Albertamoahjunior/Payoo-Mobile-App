@@ -5,16 +5,20 @@ class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final dynamic icon; // Can be either IconData or String
+  final Color backgroundColor; // Add this parameter
+  final Color foregroundColor; // Add this parameter
 
   const CustomButton({
     Key? key,
     required this.text,
     required this.onPressed,
-    required this.icon,
+    this.icon,
+    this.backgroundColor = AppColors.white, // Default to white if not provided
+    this.foregroundColor = AppColors.black, // Default to black if not provided
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context ) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -23,11 +27,11 @@ class CustomButton extends StatelessWidget {
       width: screenWidth * 0.9,
       child: ElevatedButton.icon(
         onPressed: onPressed,
-        icon: _buildIcon(), // Call a method to determine which widget to use
+        icon: icon != null ? _buildIcon() : const SizedBox.shrink(), // Show icon if provided
         label: Text(text),
         style: ElevatedButton.styleFrom(
-          foregroundColor: AppColors.black,
-          backgroundColor: AppColors.white,
+          foregroundColor: foregroundColor,
+          backgroundColor: backgroundColor, // Use the passed background color
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),

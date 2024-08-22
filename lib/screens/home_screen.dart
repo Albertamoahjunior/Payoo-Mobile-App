@@ -63,9 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final scannerHeight = screenSize.height * 0.4; // 40% of screen height
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -98,53 +95,56 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: isScanning
-                ? Container(
-                    height: scannerHeight,
-                    child: QRView(
-                      key: qrKey,
-                      onQRViewCreated: _onQRViewCreated,
-                    ),
-                  )
-                : GestureDetector(
+      body: isScanning
+          ? QRView(
+              key: qrKey,
+              onQRViewCreated: _onQRViewCreated,
+              overlay: QrScannerOverlayShape(
+                borderColor: AppColors.white,
+                borderRadius: 10,
+                borderLength: 30,
+                borderWidth: 10,
+                cutOutSize: MediaQuery.of(context).size.width * 0.8,
+              ),
+            )
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: GestureDetector(
                     onTap: _startScanning,
-                    child: QRScannerView(height: scannerHeight),
-                  ),
-          ),
-          if (!isScanning) ...[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Frequent Transactions',
-                  style: TextStyle(
-                    color: AppColors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    child: QRScannerView(height: MediaQuery.of(context).size.height * 0.4),
                   ),
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Frequent Transactions',
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: 3,
+                    itemBuilder: (context, index) {
+                      return TransactionItem(
+                        name: 'Amazing Grace',
+                        phoneNumber: '054 876 4990',
+                        initials: 'AG',
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  return TransactionItem(
-                    name: 'Amazing Grace',
-                    phoneNumber: '054 876 4990',
-                    initials: 'AG',
-                  );
-                },
-              ),
-            ),
-          ],
-        ],
-      ),
     );
   }
 }
+

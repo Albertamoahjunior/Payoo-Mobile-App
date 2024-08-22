@@ -97,6 +97,11 @@ flutter:
           weight: 700
         - asset: fonts/Roboto-Italic.ttf
           style: italic
+
+    
+    - family: NotoSans
+      fonts:
+        - asset: fonts/NotoSans-Regular.ttf      
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
