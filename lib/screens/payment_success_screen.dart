@@ -14,8 +14,9 @@ class PaymentSuccessScreen extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  Widget build(BuildContext context) {
+    final double imageSize = MediaQuery.of(context).size.width * 0.4; // Adjust the size based on screen width
 
-    Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
       body: Column(
@@ -31,10 +32,10 @@ class PaymentSuccessScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.check_circle_outline,
-                      color: Colors.green,
-                      size: 150,
+                    Image.asset(
+                      'assets/checkmark.png', // Replace with your image asset path
+                      height: imageSize,
+                      width: imageSize,
                     ),
                     SizedBox(height: 20),
                     Text(
@@ -44,7 +45,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                           fontSize: 20,
                           fontWeight: FontWeight.w500),
                     ),
-                  Text(
+                    Text(
                       'GH\u20B5 $amount',
                       style: TextStyle(
                         fontFamily: 'NotoSans',
@@ -67,6 +68,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                           fontSize: 30,
                           fontWeight: FontWeight.bold),
                     ),
+                   SizedBox(height: 20),
                     Text(
                       'Successful!',
                       style: TextStyle(
@@ -80,7 +82,7 @@ class PaymentSuccessScreen extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height:60),
+          SizedBox(height: 60),
           CustomButton(
             text: 'BACK HOME',
             onPressed: () {

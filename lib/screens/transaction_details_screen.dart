@@ -157,7 +157,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                   ),
                   SizedBox(height: 24),
                   CustomButton(
-                    text: 'PAY NOW',
+                    text: 'REDO TRANSACTION',
                      onPressed: () {
                         if (_amountController.text.isNotEmpty) {
                           Navigator.of(context).push(
