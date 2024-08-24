@@ -6,6 +6,9 @@ import '../components/transaction_item.dart';
 import '../utils/colors.dart';
 import 'login_screen.dart';
 import 'payment_details_screen.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -16,8 +19,63 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool isScanning = false;
+  bool isLoadingTransactions = true;  // Add this flag to indicate loading
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
+  List<dynamic> transactions = [];
+  String? userId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? storedUserId = prefs.getString('userId');
+    if (storedUserId != null) {
+      setState(() {
+        userId = storedUserId;
+      });
+      _loadTransactions();
+      _fetchTransactions();
+    }
+  }
+
+  Future<void> _loadTransactions() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? storedData = prefs.getString('transactions');
+    if (storedData != null) {
+      setState(() {
+        transactions = json.decode(storedData);
+      });
+    }
+  }
+
+  Future<void> _fetchTransactions() async {
+    if (userId == null) return;  // Ensure userId is loaded
+
+    final response = await http.get(Uri.parse(
+        'https://payoo-backend.vercel.app/users/$userId/transactions'));
+    if (response.statusCode == 200) {
+      setState(() {
+        transactions = json.decode(response.body);
+        isLoadingTransactions = false;
+      });
+      _saveTransactions();
+    } else {
+      setState(() {
+        isLoadingTransactions = false;
+      });
+      print("Failed to load transactions");
+    }
+  }
+
+  Future<void> _saveTransactions() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('transactions', json.encode(transactions));
+  }
 
   void _startScanning() {
     setState(() {
@@ -32,11 +90,11 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         isScanning = false;
       });
-      // Navigate to PaymentDetailsScreen with scanned data
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PaymentDetailsScreen(vendorData: scanData.code!),
+          builder: (context) =>
+              PaymentDetailsScreen(vendorData: scanData.code!),
         ),
       ).then((_) => controller.resumeCamera());
     });
@@ -50,7 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
         (route) => false,
       );
     } catch (e) {
-      // Handle logout error if needed
       print("Logout failed: $e");
     }
   }
@@ -113,7 +170,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: GestureDetector(
                     onTap: _startScanning,
-                    child: QRScannerView(height: MediaQuery.of(context).size.height * 0.4),
+                    child: QRScannerView(
+                        height: MediaQuery.of(context).size.height * 0.4),
                   ),
                 ),
                 Padding(
@@ -131,20 +189,39 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: 3,
-                    itemBuilder: (context, index) {
-                      return TransactionItem(
-                        name: 'Amazing Grace',
-                        phoneNumber: '054 876 4990',
-                        initials: 'AG',
-                      );
-                    },
-                  ),
+                  child: isLoadingTransactions
+                      ? Center(child: CircularProgressIndicator())
+                      : transactions.isEmpty
+                          ? Center(
+                              child: Text(
+                                'No transactions available',
+                                style: TextStyle(
+                                  color: AppColors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: transactions.length,
+                              itemBuilder: (context, index) {
+                                final transaction = transactions[index];
+                                final initials = transaction['shopName']
+                                    .split(' ')
+                                    .map((e) => e[0])
+                                    .join();
+                                return TransactionItem(
+                                  name: transaction['shopName'],
+                                  phoneNumber: transaction['vendorPhone'],
+                                  initials: initials,
+                                  amount: transaction['amount'].toString(),
+                                  ref: transaction['reference'],
+                                  vendor: transaction['vendorName']
+                                );
+                              },
+                            ),
                 ),
               ],
             ),
     );
   }
 }
-

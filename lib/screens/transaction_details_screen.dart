@@ -1,76 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../utils/colors.dart';
 import '../components/custom_button.dart';
 import 'payment_success_screen.dart';
 
-class PaymentDetailsScreen extends StatefulWidget {
-  final String vendorData;
+class TransactionDetailsScreen extends StatefulWidget {
+  final String name;
+  final String phoneNumber;
+  final String amount;
+  final String ref;
+  final String vendor;
 
-  const PaymentDetailsScreen({Key? key, required this.vendorData}) : super(key: key);
+  const TransactionDetailsScreen({
+    Key? key,
+    required this.name,
+    required this.phoneNumber,
+    required this.amount,
+    required this.ref,
+    required this.vendor,
+  }) : super(key: key);
 
   @override
-  _PaymentDetailsScreenState createState() => _PaymentDetailsScreenState();
+  _TransactionDetailsScreenState createState() =>
+      _TransactionDetailsScreenState();
 }
 
-class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
-  Map<String, dynamic>? vendorDetails;
-  bool isLoading = true;
-  final TextEditingController _amountController = TextEditingController(); // Controller for the amount text field
+class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
+  late TextEditingController _refController;
+  //late TextEditingController _phoneNumberController;
+  late TextEditingController _amountController;
 
   @override
   void initState() {
     super.initState();
-    fetchVendorDetails(widget.vendorData);
+    // Initialize controllers with data from the transaction item
+    _refController = TextEditingController(text: widget.ref);
+    //_phoneNumberController = TextEditingController(text: widget.phoneNumber);
+    _amountController = TextEditingController(text: widget.amount);
   }
 
-  Future<void> fetchVendorDetails(String vendorId) async {
-    final response = await http.get(Uri.parse('https://payoo-backend.vercel.app/vendors/$vendorId'));
-
-    if (response.statusCode == 200) {
-      setState(() {
-        vendorDetails = json.decode(response.body);
-        isLoading = false;
-
-        if (vendorDetails?['accountStatus'] == 'inactive') {
-          showVendorInactiveDialog();
-        }
-      });
-    } else {
-      // Handle error
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  void showVendorInactiveDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Vendor Inactive',
-            style: TextStyle(color: AppColors.white),
-          ),
-          content: Text('This vendor is no more active in our system and cannot be used for payments.',
-            style: TextStyle(color: AppColors.white),
-          ),
-          backgroundColor: AppColors.background,
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop(); // Go back to the previous screen
-              },
-              child: Text('OK', 
-                style: TextStyle(color: AppColors.white),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+  @override
+  void dispose() {
+    _refController.dispose();
+    // _phoneNumberController.dispose();
+    _amountController.dispose();
+    super.dispose();
   }
 
   @override
@@ -80,107 +53,110 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white,),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: isLoading 
-        ? Center(child: CircularProgressIndicator()) 
-        : vendorDetails == null 
-          ? Center(child: Text('Error loading vendor details'))
-          : SingleChildScrollView(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Card(
-                    color: AppColors.primary,
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('VENDOR', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.normal)),
-                          Text(vendorDetails!['shopName'], style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                          SizedBox(height: 8),
-                          Text(vendorDetails!['phoneNumber'], style: TextStyle(color: Colors.white)),
-                          Text(vendorDetails!['vendorName'], style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  TextField(
-                    controller: _amountController, // Attach the controller
-                    decoration: InputDecoration(
-                      hintText: 'Amount e.g. 20',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      setState(() {}); // Update UI when the amount changes
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Reference',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Text('Category', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                   children: [
-                      'FOOD', 'DRINKS', 'SCHOOL', 'SANITARY', 'CLOTHS', 'OUTING', 'TRANSPORT', 'FOOD', 'OTHER'
-                    ].map((category) => SizedBox(
-                      width: 100, // Adjust this width to your desired size
-                      child: Chip(
-                        label: Text(
-                          category,
-                          style: TextStyle(color: Colors.black), // Black text color
-                        ),
-                        backgroundColor: Colors.primaries[category.hashCode % Colors.primaries.length],
-                      ),
-                    )).toList(),
-                  ),
-                  SizedBox(height: 24),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text( 'Total: GH₵ ${_amountController.text.isNotEmpty ? _amountController.text : '0.00'}', style: TextStyle(fontFamily: 'NotoSans', fontSize: 24, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-                      SizedBox(height: 8),
-                      Text('This includes all taxes + transaction fees', style: TextStyle(color: Colors.black, fontWeight: FontWeight.normal), textAlign: TextAlign.center),
-                    ],
-                  ),
-                  SizedBox(height: 24),
-                  CustomButton(
-                    text: 'REDO TRANSACTION',
-                     onPressed: () {
-                        if (_amountController.text.isNotEmpty) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => PaymentSuccessScreen(
-                                amount: _amountController.text,
-                                shopName: vendorDetails!['shopName'],
-                              ),
-                            ),
-                          );
-                        } else {
-                          // Show an error message if amount is empty
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Please enter an amount')),
-                          );
-                        }
-                      }, 
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.white,
-                  ),
-                ],
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Card(
+              color: AppColors.primary,
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Vendor', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.normal, fontSize:20)),
+                    Text(widget.name,
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold)),
+                    SizedBox(height: 8),
+                    Text(widget.phoneNumber,
+                        style: TextStyle(color: Colors.white)),
+                    Text(widget.vendor,
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold)),
+                  ],
+                ),
               ),
             ),
+            SizedBox(height: 16),
+            TextField(
+              controller:
+                  _amountController, // Pre-filled with the passed amount
+              decoration: InputDecoration(
+                labelText: 'Amount',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _refController, // Pre-filled with the passed name
+              decoration: InputDecoration(
+                labelText: 'Reference',
+                border: OutlineInputBorder(),
+              ),
+            ),
+             SizedBox(height: 16),
+              Text('Category', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  'FOOD', 'DRINKS', 'SCHOOL', 'SANITARY', 'CLOTHS', 'OUTING', 'TRANSPORT', 'FOOD', 'OTHER'
+                ].map((category) => SizedBox(
+                  width: 100, // Adjust this width to your desired size
+                  child: Chip(
+                    label: Text(
+                      category,
+                      style: TextStyle(color: Colors.black), // Black text color
+                    ),
+                    backgroundColor: Colors.primaries[category.hashCode % Colors.primaries.length],
+                  ),
+                )).toList(),
+              ),
+              SizedBox(height: 24),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text( 'Total: GH₵ ${_amountController.text.isNotEmpty ? _amountController.text : '0.00'}', style: TextStyle(fontFamily: 'NotoSans', fontSize: 24, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                  SizedBox(height: 8),
+                  Text('This includes all taxes + transaction fees', style: TextStyle(color: Colors.black, fontWeight: FontWeight.normal), textAlign: TextAlign.center),
+                ],
+              ),
+              SizedBox(height: 24),
+            CustomButton(
+              text: 'CONFIRM PAYMENT',
+              onPressed: () {
+                if (_amountController.text.isNotEmpty) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => PaymentSuccessScreen(
+                        amount: _amountController.text,
+                        shopName: widget
+                            .name, // Assuming shopName is replaced with name
+                      ),
+                    ),
+                  );
+                } else {
+                  // Show an error message if amount is empty
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Please enter an amount')),
+                  );
+                }
+              },
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
