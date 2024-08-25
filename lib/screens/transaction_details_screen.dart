@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/colors.dart';
 import '../components/custom_button.dart';
+import '../components/category_chip.dart';
 import 'payment_success_screen.dart';
 
 class TransactionDetailsScreen extends StatefulWidget {
@@ -26,28 +27,33 @@ class TransactionDetailsScreen extends StatefulWidget {
 
 class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
   late TextEditingController _refController;
-  //late TextEditingController _phoneNumberController;
   late TextEditingController _amountController;
 
   @override
   void initState() {
     super.initState();
-    // Initialize controllers with data from the transaction item
     _refController = TextEditingController(text: widget.ref);
-    //_phoneNumberController = TextEditingController(text: widget.phoneNumber);
     _amountController = TextEditingController(text: widget.amount);
   }
 
   @override
   void dispose() {
     _refController.dispose();
-    // _phoneNumberController.dispose();
     _amountController.dispose();
     super.dispose();
   }
 
+  void _setReferenceText(String category) {
+    setState(() {
+      _refController.text = category;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -69,7 +75,11 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Vendor', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.normal, fontSize:20)),
+                    Text('Vendor',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 20)),
                     Text(widget.name,
                         style: TextStyle(
                             color: Colors.white,
@@ -87,8 +97,7 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
             ),
             SizedBox(height: 16),
             TextField(
-              controller:
-                  _amountController, // Pre-filled with the passed amount
+              controller: _amountController,
               decoration: InputDecoration(
                 labelText: 'Amount',
                 border: OutlineInputBorder(),
@@ -96,41 +105,59 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
             ),
             SizedBox(height: 16),
             TextField(
-              controller: _refController, // Pre-filled with the passed name
+              controller: _refController,
               decoration: InputDecoration(
                 labelText: 'Reference',
                 border: OutlineInputBorder(),
               ),
             ),
-             SizedBox(height: 16),
-              Text('Category', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  'FOOD', 'DRINKS', 'SCHOOL', 'SANITARY', 'CLOTHS', 'OUTING', 'TRANSPORT', 'FOOD', 'OTHER'
-                ].map((category) => SizedBox(
-                  width: 100, // Adjust this width to your desired size
-                  child: Chip(
-                    label: Text(
-                      category,
-                      style: TextStyle(color: Colors.black), // Black text color
-                    ),
-                    backgroundColor: Colors.primaries[category.hashCode % Colors.primaries.length],
-                  ),
-                )).toList(),
-              ),
-              SizedBox(height: 24),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text( 'Total: GH₵ ${_amountController.text.isNotEmpty ? _amountController.text : '0.00'}', style: TextStyle(fontFamily: 'NotoSans', fontSize: 24, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-                  SizedBox(height: 8),
-                  Text('This includes all taxes + transaction fees', style: TextStyle(color: Colors.black, fontWeight: FontWeight.normal), textAlign: TextAlign.center),
-                ],
-              ),
-              SizedBox(height: 24),
+            SizedBox(height: 16),
+            Text('Category',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                'FOOD',
+                'DRINKS',
+                'SCHOOL',
+                'SANITARY',
+                'CLOTHS',
+                'OUTING',
+                'TRANSPORT',
+                'FOOD',
+                'OTHER'
+              ]
+                  .map((category) => CustomCategoryChip(
+                        category: category,
+                        width: screenWidth *
+                            0.29,
+                        height: screenHeight *
+                            0.05,
+                        onSelected: _setReferenceText,
+                      ))
+                  .toList(),
+            ),
+            SizedBox(height: 24),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                    'Total: GH₵ ${_amountController.text.isNotEmpty ? _amountController.text : '0.00'}',
+                    style: TextStyle(
+                        fontFamily: 'NotoSans',
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center),
+                SizedBox(height: 8),
+                Text('This includes all taxes + transaction fees',
+                    style: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.normal),
+                    textAlign: TextAlign.center),
+              ],
+            ),
+            SizedBox(height: 24),
             CustomButton(
               text: 'CONFIRM PAYMENT',
               onPressed: () {
@@ -139,13 +166,11 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
                     MaterialPageRoute(
                       builder: (context) => PaymentSuccessScreen(
                         amount: _amountController.text,
-                        shopName: widget
-                            .name, // Assuming shopName is replaced with name
+                        shopName: widget.name,
                       ),
                     ),
                   );
                 } else {
-                  // Show an error message if amount is empty
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Please enter an amount')),
                   );
@@ -160,3 +185,4 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
     );
   }
 }
+

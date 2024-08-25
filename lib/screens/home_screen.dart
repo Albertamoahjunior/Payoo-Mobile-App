@@ -4,7 +4,7 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../components/qr_scanner_view.dart';
 import '../components/transaction_item.dart';
 import '../utils/colors.dart';
-import 'login_screen.dart';
+import 'profile_screen.dart';
 import 'payment_details_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -100,12 +100,11 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _logout() async {
+  Future<void> _profile() async {
     try {
       await FirebaseAuth.instance.signOut();
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-        (route) => false,
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => ProfileScreen())
       );
     } catch (e) {
       print("Logout failed: $e");
@@ -137,10 +136,10 @@ class _HomeScreenState extends State<HomeScreen> {
             : null,
         actions: [
           PopupMenuButton<String>(
-            icon: Icon(Icons.menu, color: AppColors.white),
+            icon: Icon(Icons.person, color: AppColors.white),
             onSelected: (String result) {
               if (result == 'logout') {
-                _logout();
+                _profile();
               }
             },
             itemBuilder: (BuildContext context) => [

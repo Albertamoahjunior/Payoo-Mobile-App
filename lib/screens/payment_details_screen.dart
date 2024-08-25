@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../utils/colors.dart';
 import '../components/custom_button.dart';
 import 'payment_success_screen.dart';
+import '../components/category_chip.dart';
 
 class PaymentDetailsScreen extends StatefulWidget {
   final String vendorData;
@@ -18,6 +19,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
   Map<String, dynamic>? vendorDetails;
   bool isLoading = true;
   final TextEditingController _amountController = TextEditingController(); // Controller for the amount text field
+  final TextEditingController _refController = TextEditingController(); // Controller for the reference text field
 
   @override
   void initState() {
@@ -50,10 +52,12 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Vendor Inactive',
+          title: Text(
+            'Vendor Inactive',
             style: TextStyle(color: AppColors.white),
           ),
-          content: Text('This vendor is no more active in our system and cannot be used for payments.',
+          content: Text(
+            'This vendor is no more active in our system and cannot be used for payments.',
             style: TextStyle(color: AppColors.white),
           ),
           backgroundColor: AppColors.background,
@@ -63,7 +67,8 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                 Navigator.of(context).pop();
                 Navigator.of(context).pop(); // Go back to the previous screen
               },
-              child: Text('OK', 
+              child: Text(
+                'OK',
                 style: TextStyle(color: AppColors.white),
               ),
             ),
@@ -73,8 +78,18 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
     );
   }
 
+  void _setReferenceText(String category) {
+    setState(() {
+      _refController.text = category;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Get the screen width and height using MediaQuery
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -122,6 +137,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                   ),
                   SizedBox(height: 16),
                   TextField(
+                    controller: _refController, // Attach the controller
                     decoration: InputDecoration(
                       hintText: 'Reference',
                       border: OutlineInputBorder(),
@@ -133,18 +149,26 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                   children: [
-                      'FOOD', 'DRINKS', 'SCHOOL', 'SANITARY', 'CLOTHS', 'OUTING', 'TRANSPORT', 'FOOD', 'OTHER'
-                    ].map((category) => SizedBox(
-                      width: 100, // Adjust this width to your desired size
-                      child: Chip(
-                        label: Text(
-                          category,
-                          style: TextStyle(color: Colors.black), // Black text color
-                        ),
-                        backgroundColor: Colors.primaries[category.hashCode % Colors.primaries.length],
-                      ),
-                    )).toList(),
+                    children: [
+                      'FOOD',
+                      'DRINKS',
+                      'SCHOOL',
+                      'SANITARY',
+                      'CLOTHS',
+                      'OUTING',
+                      'TRANSPORT',
+                      'FOOD',
+                      'OTHER'
+                    ]
+                        .map((category) => CustomCategoryChip(
+                              category: category,
+                              width: screenWidth *
+                                  0.29, // Adjusted width to 25% of screen width
+                              height: screenHeight *
+                                  0.05, // Adjusted height to 5% of screen height
+                              onSelected: _setReferenceText, // Callback for chip selection
+                            ))
+                        .toList(),
                   ),
                   SizedBox(height: 24),
                   Column(
@@ -184,3 +208,4 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
     );
   }
 }
+
