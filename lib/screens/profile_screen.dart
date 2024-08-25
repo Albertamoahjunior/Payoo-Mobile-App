@@ -7,7 +7,6 @@ import '../utils/colors.dart';
 import '../components/custom_button.dart';
 import 'login_screen.dart';
 
-
 class ProfileScreen extends StatefulWidget {
   ProfileScreen({Key? key}) : super(key: key);
 
@@ -34,10 +33,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   _loadUserProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      userProfile['name'] = prefs.getString('name') ?? 'Not set';
-      userProfile['email'] = prefs.getString('email') ?? 'Not set';
-      userProfile['phone'] = prefs.getString('phone') ?? '';
-      userProfile['accountNumber'] = prefs.getString('accountNumber') ?? 'Not set';
+      userProfile['name'] = prefs.getString('userName') ?? 'Not set';
+      userProfile['email'] = prefs.getString('userEmail') ?? 'Not set';
+      userProfile['phone'] = prefs.getString('userPhone') ?? '';
+      // userProfile['accountNumber'] = prefs.getString('accountNumber') ?? 'Not set';
       String? imagePath = prefs.getString('profileImage');
       if (imagePath != null) {
         _imageFile = File(imagePath);
@@ -88,7 +87,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
@@ -99,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   //log users out
-   Future<void> _logout() async {
+  Future<void> _logout() async {
     try {
       await FirebaseAuth.instance.signOut();
       Navigator.of(context).pushAndRemoveUntil(
@@ -117,6 +117,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         title: Text('My Profile'),
         backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.white,
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -129,13 +130,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: GestureDetector(
                       onTap: _pickImage,
                       child: CircleAvatar(
-                        radius: 50,
+                        radius: 100,
                         backgroundColor: AppColors.primary,
-                        backgroundImage: _imageFile != null ? FileImage(_imageFile!) : null,
+                        backgroundImage:
+                            _imageFile != null ? FileImage(_imageFile!) : null,
                         child: _imageFile == null
                             ? Text(
                                 userProfile['name']![0],
-                                style: TextStyle(fontSize: 40, color: Colors.white),
+                                style: TextStyle(
+                                    fontSize: 40, color: Colors.white),
                               )
                             : null,
                       ),
@@ -153,10 +156,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ? TextButton(
                             onPressed: _setPhoneNumber,
                             child: Text('Add Phone Number'),
+                            style: ButtonStyle(
+                              foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                            ),
                           )
                         : null,
                   ),
-                  ProfileItem(title: 'Account Number', value: userProfile['accountNumber']!),
+                  // ProfileItem(title: 'Account Number', value: userProfile['accountNumber']!),
                   SizedBox(height: 24),
                   CustomButton(
                     text: 'Edit Profile',
@@ -171,6 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     text: 'Log Out',
                     onPressed: () {
                       // TODO: Implement logout functionality
+                      _logout();
                     },
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
@@ -203,7 +210,7 @@ class ProfileItem extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(fontSize: 14, color: Colors.grey),
+            style: TextStyle(fontSize: 14, color: AppColors.white),
           ),
           SizedBox(height: 4),
           Row(
@@ -211,7 +218,7 @@ class ProfileItem extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.white),
               ),
               if (trailing != null) trailing!,
             ],

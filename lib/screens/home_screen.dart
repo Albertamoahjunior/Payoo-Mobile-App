@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../components/qr_scanner_view.dart';
 import '../components/transaction_item.dart';
@@ -100,15 +99,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _profile() async {
-    try {
-      await FirebaseAuth.instance.signOut();
+  void _profile() {
       Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => ProfileScreen())
       );
-    } catch (e) {
-      print("Logout failed: $e");
-    }
   }
 
   @override
@@ -123,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        foregroundColor: AppColors.white,
         elevation: 0,
         leading: isScanning
             ? IconButton(
@@ -135,20 +130,13 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             : null,
         actions: [
-          PopupMenuButton<String>(
+         IconButton(
             icon: Icon(Icons.person, color: AppColors.white),
-            onSelected: (String result) {
-              if (result == 'logout') {
-                _profile();
-              }
+            iconSize: 40.0, // Set the desired icon size here
+            onPressed: () {
+              _profile(); // Call the function directly when the icon is pressed
             },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: Text('Logout'),
-              ),
-            ],
-          ),
+          )
         ],
       ),
       body: isScanning
